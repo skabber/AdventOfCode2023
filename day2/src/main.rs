@@ -16,14 +16,18 @@ struct Set {
 
 fn main() {
     let mut id_sum = 0;
+    let mut powers = 0;
     for line in std::io::stdin().lock().lines() {
         let run = parseline(line.unwrap());
         if game_is_possible(&run) {
             println!("Game is possible.");
             id_sum += run.id;
         }
+        let values = fewest_cubes_possible(run);
+        powers += values.iter().copied().reduce(|a, b| a * b).unwrap();
     }
     println!("{}", id_sum);
+    println!("{}", powers);
 }
 
 fn parseline(l: String) -> GameRun {
@@ -90,6 +94,35 @@ fn game_is_possible(run: &GameRun) -> bool {
     is_possible
 }
 
+fn fewest_cubes_possible(game_run: GameRun) -> [u32; 3] {
+    let mut red = 0;
+    let mut green = 0;
+    let mut blue = 0;
+    for set in game_run.sets {
+        for cube in set.cubes {
+            match cube.color.as_str() {
+                "red" => {
+                    if cube.count > red {
+                        red = cube.count
+                    }
+                }
+                "green" => {
+                    if cube.count > green {
+                        green = cube.count
+                    }
+                }
+                "blue" => {
+                    if cube.count > blue {
+                        blue = cube.count
+                    }
+                }
+                _ => println!("not red green or blue"),
+            }
+        }
+    }
+    [red, green, blue]
+}
+
 #[test]
 fn line_color_test() {
     // Set 1
@@ -102,4 +135,14 @@ fn line_color_test() {
     let is_possible = game_is_possible(&result);
 
     assert!(is_possible);
+}
+
+#[test]
+fn power_test() {
+    let input = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string();
+    let game_run = parseline(input);
+    let values = fewest_cubes_possible(game_run);
+    let power: u32 = values.iter().copied().reduce(|a, b| a * b).unwrap();
+
+    assert_eq!(power, 48);
 }
