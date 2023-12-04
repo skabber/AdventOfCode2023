@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::io::BufRead;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Item {
     index: usize,
     value: String,
@@ -18,8 +18,15 @@ fn main() {
         let res = parse_line(line.unwrap().as_str());
         ld.push(res);
     }
-    let res = process_data(ld);
-    println!("{}", res);
+    let (valid_parts, ratios) = process_data(ld);
+    let sum = sum_valid_parts(valid_parts);
+    println!("sum of parts = {} : gear ratios = {}", sum, ratios);
+}
+
+fn sum_valid_parts(parts: Vec<Item>) -> u32 {
+    parts
+        .iter()
+        .fold(0, |acc, e| acc + e.value.parse::<u32>().unwrap())
 }
 
 fn parse_line(s: &str) -> LineData {
@@ -41,44 +48,46 @@ fn collect_items(re: Regex, s: &str) -> Vec<Item> {
     items
 }
 
-fn process_data(ld: Vec<LineData>) -> u32 {
-    let mut valid_parts: Vec<&Item> = Vec::new();
+fn process_data(ld: Vec<LineData>) -> (Vec<Item>, u32) {
+    let mut valid_parts: Vec<Item> = Vec::new();
+    let mut sum_ratios = 0;
     for n in 0..ld.len() {
-        if !ld[n].symbols.is_empty() {
-            for symbol in &ld[n].symbols {
-                let symbol_range = (&symbol.index) - 1..(&symbol.index) + 1;
-                // check line above
-                if n > 0 {
-                    // can't check above the first line
-                    fun_name(&ld, n - 1, &symbol_range, &mut valid_parts);
-                }
-
-                // check this line
-                fun_name(&ld, n, &symbol_range, &mut valid_parts);
-
-                // check line below
-                fun_name(&ld, n + 1, &symbol_range, &mut valid_parts);
+        for symbol in &ld[n].symbols {
+            let mut symbol_parts: Vec<Item> = Vec::new();
+            let symbol_range = (&symbol.index) - 1..(&symbol.index) + 1;
+            // check line above
+            if n > 0 {
+                // can't check above the first line
+                find_valid_parts(&ld, n - 1, &symbol_range, &mut symbol_parts);
             }
+
+            // check this line
+            find_valid_parts(&ld, n, &symbol_range, &mut symbol_parts);
+
+            // check line below
+            find_valid_parts(&ld, n + 1, &symbol_range, &mut symbol_parts);
+
+            if symbol_parts.len() == 2 {
+                sum_ratios += symbol_parts[0].value.parse::<u32>().unwrap()
+                    * symbol_parts[1].value.parse::<u32>().unwrap();
+            }
+
+            valid_parts.append(&mut symbol_parts);
         }
     }
-    let x = valid_parts
-        .iter()
-        .fold(0, |acc, e| acc + e.value.parse::<u32>().unwrap());
-
-    x
+    (valid_parts, sum_ratios)
 }
 
-fn fun_name<'a>(
-    ld: &'a [LineData],
+fn find_valid_parts(
+    ld: &[LineData],
     n: usize,
     symbol_range: &std::ops::Range<usize>,
-    valid_parts: &mut Vec<&'a Item>,
+    valid_parts: &mut Vec<Item>,
 ) {
     for number in &*ld[n].numbers {
         let range = number.index..(number.index + number.value.len() - 1);
         if ranges_overlap(range, symbol_range.clone()) {
-            println!("match! {:?}", number);
-            valid_parts.push(number);
+            valid_parts.push(number.clone());
         }
     }
 }
@@ -105,7 +114,9 @@ fn test_schematic() {
         let items = parse_line(line);
         ld.push(items);
     }
-    let res = process_data(ld);
-    println!("{}", res);
-    assert_eq!(res, 4361);
+    let (valid_parts, ratios) = process_data(ld);
+    let sum = sum_valid_parts(valid_parts);
+
+    assert_eq!(sum, 4361);
+    assert_eq!(ratios, 467835);
 }
