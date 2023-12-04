@@ -25,7 +25,7 @@ fn parse_card(line: &str) -> usize {
                 if val == 0 {
                     val = 1;
                 } else {
-                    val = val * 2;
+                    val *= 2;
                 }
                 println!("{}:{}", y, val);
             }
