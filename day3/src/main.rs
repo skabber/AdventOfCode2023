@@ -30,7 +30,7 @@ fn sum_valid_parts(parts: Vec<Item>) -> u32 {
 }
 
 fn parse_line(s: &str) -> LineData {
-    let mut re = Regex::new(r"(\d+)+").unwrap();
+    let mut re = Regex::new(r"(\d+)").unwrap();
     let numbers: Vec<Item> = collect_items(re, s);
     re = Regex::new(r"([^0-9.])").unwrap();
     let symbols = collect_items(re, s);
