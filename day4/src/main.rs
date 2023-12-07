@@ -1,4 +1,4 @@
-use std::{collections::HashSet};
+use std::collections::HashSet;
 use std::io::Read;
 
 fn main() {
@@ -67,7 +67,8 @@ fn test_cards() {
     Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
     Card 5: 1 2 3 4 5 | 6 7 8 9 10
     Card 6: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
-    Card 7: 31 18 13 56 72 | 74 77 10 23 35 67 36 11".to_string();
+    Card 7: 31 18 13 56 72 | 74 77 10 23 35 67 36 11"
+        .to_string();
     let (val, card_count) = parse_input(input);
     assert_eq!(val, 13);
     assert_eq!(card_count, 31);
