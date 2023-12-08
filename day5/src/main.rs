@@ -16,13 +16,21 @@ struct SourceDestinationMap {
 fn main() {
     let mut input = String::new();
     std::io::stdin().lock().read_to_string(&mut input).unwrap();
-    let val = parse_input(input.as_str());
-    println!("{}", val);
+
+    let mut lines = input.lines();
+    let seed_line = lines.next().unwrap();
+
+    let seed_numbers = get_seed_numbers(seed_line);
+
+    let all_seeds = get_all_seeds(seed_numbers);
+    // println!("{:?}", all_seeds);
+    let lowest_location = parse_input(lines, all_seeds);
+    println!("{}", lowest_location);
 }
 
-fn parse_input(input: &str) -> u64 {
-    let sections = get_structured_map(input);
-    let mut seed_numbers: Vec<u64> = Vec::new();
+fn parse_input(lines: std::str::Lines<'_>, seed_numbers: Vec<u64>) -> u64 {
+    let mut next_numbers = seed_numbers.clone();
+    let sections = get_structured_map(lines);
 
     for section in sections {
         let mut maps: Vec<SourceDestinationMap> = Vec::new();
@@ -34,7 +42,7 @@ fn parse_input(input: &str) -> u64 {
                         .split_ascii_whitespace()
                         .collect();
                     if !seedparts.is_empty() {
-                        seed_numbers = seedparts
+                        next_numbers = seedparts
                             .iter()
                             .map(|p| p.parse::<u64>().unwrap())
                             .collect();
@@ -46,7 +54,6 @@ fn parse_input(input: &str) -> u64 {
                     let end: u64 = r_parts[1].parse().unwrap();
                     let size: u64 = r_parts[2].parse().unwrap();
                     let destination_range = start..start + size;
-                    println!("about to {}", end);
                     let source_range: std::ops::Range<u64> = end..end + size;
                     maps.push(SourceDestinationMap {
                         source_range,
@@ -56,33 +63,33 @@ fn parse_input(input: &str) -> u64 {
                 Ordering::Less => {}
             }
         }
-        println!("{:?}", maps);
 
-        for seed in &seed_numbers {
-            let mut dest_value_op: Option<u64> = None;
-            for map in &maps {
-                if map.source_range.contains(seed) {
-                    let source_index = seed - map.source_range.start;
-                    let dest_value = map.destination_range.start + source_index;
-                    dest_value_op = Some(dest_value);
-                    locations.push(dest_value);
-                    println!("{:?}", locations);
+        if !maps.is_empty() {
+            for seed in &next_numbers {
+                let mut dest_value_op: Option<u64> = None;
+                for map in &maps {
+                    if map.source_range.contains(seed) {
+                        let source_index = seed - map.source_range.start;
+                        let dest_value = map.destination_range.start + source_index;
+                        dest_value_op = Some(dest_value);
+                        locations.push(dest_value);
+                    }
+                }
+                if dest_value_op.is_none() {
+                    locations.push(*seed);
                 }
             }
-            if dest_value_op.is_none() {
-                locations.push(*seed);
-            }
+            next_numbers = locations.clone();
         }
-        seed_numbers = locations.clone();
     }
-    seed_numbers.sort();
-    seed_numbers[0]
+    next_numbers.sort();
+    next_numbers[0]
 }
 
-fn get_structured_map(input: &str) -> Vec<Section> {
+fn get_structured_map(lines: std::str::Lines<'_>) -> Vec<Section<'_>> {
     let mut sections: Vec<Section> = Vec::new();
     let mut section: Option<Section> = None;
-    for line in input.split('\n') {
+    for line in lines {
         match section {
             None => section = Some(Section { lines: Vec::new() }),
             Some(_) => {}
@@ -99,13 +106,39 @@ fn get_structured_map(input: &str) -> Vec<Section> {
     sections
 }
 
+fn get_seed_numbers(line: &str) -> Vec<u64> {
+    let mut seed_numbers: Vec<u64> = Vec::new();
+    let seedparts: Vec<&str> = line.split(':').collect::<Vec<&str>>()[1]
+        .split_ascii_whitespace()
+        .collect();
+    if !seedparts.is_empty() {
+        seed_numbers = seedparts
+            .iter()
+            .map(|p| p.parse::<u64>().unwrap())
+            .collect();
+    }
+    seed_numbers
+}
+
+fn get_all_seeds(seed_numbers: Vec<u64>) -> Vec<u64> {
+    let mut all_seeds: Vec<u64> = Vec::new();
+    for (i, seed) in seed_numbers.iter().enumerate() {
+        if (i + 1) % 2 == 0 {
+            let r = seed_numbers[i - 1]..seed_numbers[i - 1] + *seed;
+
+            println!("{:?}", r);
+            all_seeds.append(&mut r.collect::<Vec<u64>>());
+            // all_seeds.append(&mut items);
+        }
+    }
+    all_seeds
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::parse_input;
+    use crate::{get_all_seeds, get_seed_numbers, parse_input};
 
-    #[test]
-    fn test1() {
-        let input = "seeds: 79 14 55 13
+    const INPUT: &str = "seeds: 79 14 55 13
 
 seed-to-soil map:
 50 98 2
@@ -138,7 +171,23 @@ temperature-to-humidity map:
 humidity-to-location map:
 60 56 37
 56 93 4";
-        let lowest_location = parse_input(input);
+    #[test]
+    fn part1() {
+        let mut lines = INPUT.lines();
+        let seed_numbers = get_seed_numbers(lines.next().unwrap());
+        let lowest_location = parse_input(lines, seed_numbers);
         assert_eq!(lowest_location, 35);
+    }
+
+    #[test]
+    fn part2() {
+        let mut lines = INPUT.lines();
+        let seed_line = lines.next().unwrap();
+        let seed_numbers = get_seed_numbers(seed_line);
+
+        let all_seeds = get_all_seeds(seed_numbers);
+
+        let lowest_location = parse_input(lines, all_seeds);
+        assert_eq!(lowest_location, 46);
     }
 }
