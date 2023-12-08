@@ -54,7 +54,7 @@ fn parse_input(lines: std::str::Lines<'_>, seed_numbers: Vec<u64>) -> u64 {
                     let end: u64 = r_parts[1].parse().unwrap();
                     let size: u64 = r_parts[2].parse().unwrap();
                     let destination_range = start..start + size;
-                    let source_range: std::ops::Range<u64> = end..end + size;
+                    let source_range: Range<u64> = end..end + size;
                     maps.push(SourceDestinationMap {
                         source_range,
                         destination_range,
@@ -171,6 +171,7 @@ temperature-to-humidity map:
 humidity-to-location map:
 60 56 37
 56 93 4";
+
     #[test]
     fn part1() {
         let mut lines = INPUT.lines();
