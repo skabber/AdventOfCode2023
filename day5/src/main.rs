@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::cmp::Ordering;
 use std::io::Read;
 use std::ops::Range;
@@ -35,6 +36,7 @@ fn parse_input(lines: std::str::Lines<'_>, seed_numbers: Vec<u64>) -> u64 {
     for section in sections {
         let mut maps: Vec<SourceDestinationMap> = Vec::new();
         let mut locations: Vec<u64> = Vec::new();
+
         for (i, line) in section.lines.iter().enumerate() {
             match i.cmp(&0) {
                 Ordering::Equal => {
@@ -43,7 +45,7 @@ fn parse_input(lines: std::str::Lines<'_>, seed_numbers: Vec<u64>) -> u64 {
                         .collect();
                     if !seedparts.is_empty() {
                         next_numbers = seedparts
-                            .iter()
+                            .par_iter()
                             .map(|p| p.parse::<u64>().unwrap())
                             .collect();
                     }
@@ -113,7 +115,7 @@ fn get_seed_numbers(line: &str) -> Vec<u64> {
         .collect();
     if !seedparts.is_empty() {
         seed_numbers = seedparts
-            .iter()
+            .par_iter()
             .map(|p| p.parse::<u64>().unwrap())
             .collect();
     }
@@ -121,18 +123,24 @@ fn get_seed_numbers(line: &str) -> Vec<u64> {
 }
 
 fn get_all_seeds(seed_numbers: Vec<u64>) -> Vec<u64> {
-    let mut all_seeds: Vec<u64> = Vec::new();
-    for (i, seed) in seed_numbers.iter().enumerate() {
-        if (i + 1) % 2 == 0 {
-            let r = seed_numbers[i - 1]..seed_numbers[i - 1] + *seed;
-
-            println!("{:?}", r);
-            all_seeds.append(&mut r.collect::<Vec<u64>>());
-            // all_seeds.append(&mut items);
-        }
-    }
-    all_seeds
+    seed_numbers
+        .par_iter()
+        .enumerate()
+        .filter_map(|(i, &seed)| {
+            if (i + 1) % 2 == 0 {
+                let start = seed_numbers[i - 1];
+                let r = start..start + seed;
+                let x = Some((r).clone().collect::<Vec<u64>>());
+                println!("{:?}", r);
+                x
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect()
 }
+
 
 #[cfg(test)]
 mod tests {
