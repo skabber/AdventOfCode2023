@@ -22,7 +22,7 @@ fn main() {
 }
 
 fn fun_times(mut lines: &mut Lines) -> u64 {
-    let races = parse(&mut lines);
+    let races = parse(lines);
     let mut wins_count: Vec<u64> = Vec::new();
     for race in &races {
         let wins = run_one_race(race);
@@ -47,11 +47,7 @@ fn run_one_race(race: &Race) -> u64 {
 fn run_race(time: u64, i: u64, distance: u64) -> bool {
     let run_time = time - i;
     let run_distance = run_time * i;
-    if run_distance > distance {
-        return true;
-    } else {
-        return false;
-    }
+    run_distance > distance
 }
 
 fn parse(lines: &mut Lines) -> Vec<Race> {
@@ -60,7 +56,7 @@ fn parse(lines: &mut Lines) -> Vec<Race> {
     let line_one_nums = numbers_in_line(line1);
     let line_two_nums = numbers_in_line(line2);
     let mut races: Vec<Race> = Vec::new();
-    for (i, num) in line_one_nums.iter().enumerate() {
+    for (i, _num) in line_one_nums.iter().enumerate() {
         races.push(Race {
             time: line_one_nums[i],
             distance: line_two_nums[i],
@@ -88,9 +84,7 @@ fn parse_2(lines: &mut Lines) -> (u64, u64) {
     for s in nums_str_two {
         s2.push_str(s);
     }
-
-    println!("{}:{}", s1, s2);
-
+    
     let time: u64 = s1.parse().unwrap();
     let distance: u64 = s2.parse().unwrap();
 
