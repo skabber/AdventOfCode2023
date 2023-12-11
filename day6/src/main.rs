@@ -12,7 +12,7 @@ fn main() {
     std::io::stdin().lock().read_to_string(&mut input).unwrap();
     let mut lines = input.lines();
     let mut lines2 = lines.clone();
-    let r = fun_times(&mut lines);
+    let r = run_races(&mut lines);
     println!("{}", r);
 
     // Part 2
@@ -21,7 +21,7 @@ fn main() {
     println!("{}", res);
 }
 
-fn fun_times(mut lines: &mut Lines) -> u64 {
+fn run_races(lines: &mut Lines) -> u64 {
     let races = parse(lines);
     let mut wins_count: Vec<u64> = Vec::new();
     for race in &races {
@@ -84,7 +84,7 @@ fn parse_2(lines: &mut Lines) -> (u64, u64) {
     for s in nums_str_two {
         s2.push_str(s);
     }
-    
+
     let time: u64 = s1.parse().unwrap();
     let distance: u64 = s2.parse().unwrap();
 
@@ -100,7 +100,7 @@ fn numbers_in_line(line: &str) -> Vec<u64> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Race, run_race, fun_times, parse_2, run_one_race};
+    use crate::{parse_2, run_one_race, run_races, Race};
 
     const INPUT: &str = "Time:      7  15   30
 Distance:  9  40  200";
@@ -108,7 +108,7 @@ Distance:  9  40  200";
     #[test]
     fn test_part_1() {
         let mut lines = INPUT.lines();
-        let res = fun_times(&mut lines);
+        let res = run_races(&mut lines);
         assert_eq!(288, res);
     }
 
