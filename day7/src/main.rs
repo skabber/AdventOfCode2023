@@ -44,9 +44,7 @@ impl PartialOrd for Hand {
 
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> Ordering {
-        // println!("{:?}:{:?}", self.cards, other.cards);
         let mut o = self.hand_value().cmp(&other.hand_value());
-        // println!("{:?} is {:?} than {:?}", self, o, other);
         if o == Ordering::Equal {
             o = self.card_values.cmp(&other.card_values);
         }
@@ -80,7 +78,6 @@ impl Hand {
         let max = match clone.values().max() {
             None => {
                 card_map.insert(&'J', 5);
-                println!("what is : {:?}", self);
                 0
             }
             Some(x) => *x,
@@ -125,7 +122,7 @@ fn main() {
     println!("{}", sum);
     let mut hands = parse_lines(input.lines(), true);
     hands.sort();
-    let sum = sum_hands(&mut hands); // ???
+    let sum = sum_hands(&mut hands); // 251135960
     println!("{}", sum);
 }
 
@@ -158,11 +155,7 @@ fn parse_line(line: &str, with_jokers: bool) -> Hand {
             .chars()
             .map(|c| card_value(&c, with_jokers))
             .collect(),
-        bid,
-        with_joker: with_jokers,
-    }
-}
-
+        bid,251135960
 #[cfg(test)]
 mod tests {
     use crate::{parse_lines, sum_hands};
@@ -180,7 +173,6 @@ QQQJA 483";
 
         let res = sum_hands(&mut hands);
 
-        hands.iter().for_each(|h| println!("{:?}", h.cards));
         println!("Result: {}", res);
         assert_eq!(6440, res);
     }
@@ -192,7 +184,6 @@ QQQJA 483";
 
         let res = sum_hands(&mut hands);
 
-        hands.iter().for_each(|h| println!("{:?}", h.cards));
         println!("Result: {}", res);
         assert_eq!(5905, res);
     }
