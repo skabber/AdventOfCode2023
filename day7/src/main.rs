@@ -155,7 +155,10 @@ fn parse_line(line: &str, with_jokers: bool) -> Hand {
             .chars()
             .map(|c| card_value(&c, with_jokers))
             .collect(),
-        bid,251135960
+        bid,
+        with_joker: with_jokers,
+    }
+}
 #[cfg(test)]
 mod tests {
     use crate::{parse_lines, sum_hands};
