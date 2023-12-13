@@ -5,13 +5,13 @@ fn main() {
     std::io::stdin().lock().read_to_string(&mut input).unwrap();
     let lines = input.lines().clone();
     let sets = parse_line(lines);
-    let answers: Vec<i32> = sets.iter().map(solve_line).collect();
+    let answers: Vec<i32> = sets.iter().map(|s| solve_line(s)).collect();
     let sum: i32 = answers.iter().sum();
     println!("{:?}", sum); // 1789635132
 }
 
-fn solve_line(input: &Vec<i32>) -> i32 {
-    let mut nexts: Vec<Vec<i32>> = vec![input.clone()];
+fn solve_line(input: &[i32]) -> i32 {
+    let mut nexts: Vec<Vec<i32>> = vec![input.to_vec()];
     let mut count = 0;
     loop {
         let mut nums: Vec<i32> = Vec::new();
@@ -68,7 +68,7 @@ mod tests {
     fn test_part1() {
         let lines = INPUT.lines();
         let sets = parse_line(lines);
-        let answers: Vec<i32> = sets.iter().map(solve_line).collect();
+        let answers: Vec<i32> = sets.iter().map(|s| solve_line(s)).collect();
         let sum: i32 = answers.iter().sum();
         println!("{:?}", sum);
         assert_eq!(sum, 114);
