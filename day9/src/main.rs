@@ -5,12 +5,16 @@ fn main() {
     std::io::stdin().lock().read_to_string(&mut input).unwrap();
     let lines = input.lines().clone();
     let sets = parse_line(lines);
-    let answers: Vec<i32> = sets.iter().map(|s| solve_line(s)).collect();
+    let answers: Vec<i32> = sets.iter().map(|s| solve_line(s, false)).collect();
     let sum: i32 = answers.iter().sum();
     println!("{:?}", sum); // 1789635132
+
+    let answers: Vec<i32> = sets.iter().map(|s| solve_line(s, true)).collect();
+    let sum: i32 = answers.iter().sum();
+    println!("{:?}", sum); // 913
 }
 
-fn solve_line(input: &[i32]) -> i32 {
+fn solve_line(input: &[i32], reverse: bool) -> i32 {
     let mut nexts: Vec<Vec<i32>> = vec![input.to_vec()];
     let mut count = 0;
     loop {
@@ -20,6 +24,7 @@ fn solve_line(input: &[i32]) -> i32 {
                 let x = nexts[count][i - 1];
                 let y = val;
                 let z = y - x;
+
                 nums.push(z);
             }
         }
@@ -36,12 +41,25 @@ fn solve_line(input: &[i32]) -> i32 {
         if i == 0 {
             y.push(0);
         } else {
-            let value = y[y.len() - 1] + prev_set[prev_set.len() - 1];
-            y.push(value);
+            let value = if !reverse {
+                y[y.len() - 1] + prev_set[prev_set.len() - 1]
+            } else {
+                y[0] - prev_set[0]
+            };
+
+            if reverse {
+                y.insert(0, value);
+            } else {
+                y.push(value);
+            }
         }
         prev_set = y;
     }
-    prev_set[prev_set.len() - 1]
+    if reverse {
+        prev_set[0]
+    } else {
+        prev_set[prev_set.len() - 1]
+    }
 }
 
 fn parse_line(lines: Lines) -> Vec<Vec<i32>> {
@@ -68,9 +86,19 @@ mod tests {
     fn test_part1() {
         let lines = INPUT.lines();
         let sets = parse_line(lines);
-        let answers: Vec<i32> = sets.iter().map(|s| solve_line(s)).collect();
+        let answers: Vec<i32> = sets.iter().map(|s| solve_line(s, false)).collect();
         let sum: i32 = answers.iter().sum();
         println!("{:?}", sum);
         assert_eq!(sum, 114);
+    }
+
+    #[test]
+    fn test_part2() {
+        let lines = INPUT.lines();
+        let sets = parse_line(lines);
+        let answers: Vec<i32> = sets.iter().map(|s| solve_line(s, true)).collect();
+        let sum: i32 = answers.iter().sum();
+        println!("{:?}", sum);
+        assert_eq!(sum, 2);
     }
 }
